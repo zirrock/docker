@@ -1,0 +1,175 @@
+swagger: "2.0"
+info:
+  description: "None"
+  version: "1.0.0"
+  title: Rest api
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+
+paths:
+  /groups:
+    get:
+      operationId: groups.read_all
+      tags:
+        - Groups
+      summary: Read the entire set of groups, sorted by name
+      responses:
+        200:
+          description: Successfully read groups
+          schema:
+            type: array
+            items:
+              properties:
+                user_id:
+                  type: string
+                  description: group_id
+                name:
+                  type: string
+                  description: Group name
+                user:
+                  type: string
+                  description: user subscribing to group
+                owner:
+                  type: string
+                  description: owner of the group
+  /groups/{username}:
+    get:
+      operationId: groups.read_user_groups
+      tags:
+        - Groups
+      summary: Read user groups
+      description: Read user groups
+      parameters:
+        - name: username
+          in: path
+          description: name of the group
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read users' groups
+          schema:
+            type: array
+            items:
+              properties:
+                group_id:
+                  type: string
+                  description: Id of the group association
+                name:
+                  type: string
+                  description: name of the group
+                user:
+                  type: string
+                  description: name of the user this is associated with
+                owner:
+                  type: string
+                  description: name of this group's owner
+  /groups/get/{group_id}:
+    get:
+      operationId: groups.read_one
+      tags:
+        - Groups
+      summary: Read one group
+      description: Read one group
+      parameters:
+        - name: group_id
+          in: path
+          description: Name of the group to get
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read group from groups data operation
+          schema:
+            type: object
+            properties:
+              group_id:
+                type: string
+                description: Id of the group
+              name:
+                type: string
+                description: Name of the group
+              user:
+                type: string
+                description: User subscribed to this entry
+              owner:
+                type: string
+                description: Owner of this group
+  /groups/subscriptions/{username}:
+    get:
+      operationId: groups.read_subscribed_groups
+      tags:
+        - Groups
+      summary: Read user subscribed groups
+      description: Read user subscribed groups
+      parameters:
+        - name: username
+          in: path
+          description: name of the group
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read users' subscribed groups
+          schema:
+            type: array
+            items:
+              properties:
+                group_id:
+                  type: string
+                  description: Id of the group association
+                name:
+                  type: string
+                  description: name of the group
+                user:
+                  type: string
+                  description: name of the user this is associated with
+                owner:
+                  type: string
+                  description: name of this group's owner
+  /groups/create:
+    post:
+      operationId: groups.create_group
+      tags:
+        - Groups
+      summary: Create new user group asynchronously
+      description: Create new user groups asynchronously
+      parameters:
+        - name: group
+          in: body
+          description: group entry to create
+          required: True
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the group 
+              user:
+                type: string
+                description: Subscriber of the group
+              owner:
+                type: string
+                description: owner of the group
+      responses:
+        202:
+          description: Group created
+          schema:
+            type: object
+            properties:
+              group_id:
+                type: string
+                description: Id of the group association
+              name:
+                type: string
+                description: name of the group
+              user:
+                type: string
+                description: name of the user this is associated with
+              owner:
+                type: string
+                description: name of this group's owner

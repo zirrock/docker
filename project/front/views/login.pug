@@ -1,0 +1,11 @@
+link(rel= 'stylesheet' type='text/css' media='screen' href='/stylesheets/style.css')
+include header
+body
+    h2 Login
+    form(method="POST" action='/login')
+        label Login
+        input(type="text" name="username" required)
+        label Hasło
+        input(type="password" name="password" required)
+        button(type="submit") Zaloguj się
+    a.login(href='/registerPage') REGISTER

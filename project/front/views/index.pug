@@ -1,0 +1,46 @@
+
+link(rel= 'stylesheet' type='text/css' media='screen' href='/stylesheets/style.css')
+include header
+.container
+    nav.left-bar
+        h2 Subskrybowane
+        if group_list
+            ul
+                each group in group_list
+                    li
+                        .date-card
+                            a(href='/groups/' + group.group_id) #{group.name}
+        else
+            p You do not belong to any group
+        form.subscribe-form(method="POST", action="/subscribeGroup")
+            label.small-label 
+                b Group name
+            input.create-form-input(type="text" name="groupSubscribe")
+            label.small-label
+                b Group owner
+            input.create-form-input(type="text" name="owner")
+            input(type="submit" value="Subskrybuj")
+    nav.center
+        h2 Nadchodzące wydarzenia
+        if dates_inc_list
+            ul
+                each date in dates_inc_list
+                    li
+                        .date-card
+                            p #{date.name}
+                            p #{date.date}
+        else
+            p You have no upcoming deadlines
+    nav.right-bar
+        h2 Twoje grupy
+        if group_own_list
+            ul
+                each group in group_own_list
+                    li
+                        .date-card
+                            a(href='/groups/' + group.group_id) #{group.name}
+        else
+            p There are no groups created by you
+        form.create-form(method="POST", action="/createGroup")
+            input.create-form-input(type="text" name="groupCreate")
+            input(type="submit" value="Stwórz")

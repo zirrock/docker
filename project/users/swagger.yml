@@ -1,0 +1,140 @@
+swagger: "2.0"
+info:
+  description: "None"
+  version: "1.0.0"
+  title: Rest api
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+
+paths:
+  /users:
+    get:
+      operationId: users.read_all
+      tags:
+        - Users
+      summary: Read the entire set of users, sorted by username
+      responses:
+        200:
+          description: Successfully read users
+          schema:
+            type: array
+            items:
+              properties:
+                user_id:
+                  type: string
+                  description: User Id
+                username:
+                  type: string
+                  description: User Username
+                password:
+                  type: string
+                  description: User hashed password
+                salt:
+                  type: string
+                  description: User hashed salt
+    post:
+      operationId: users.create
+      tags:
+        - Users
+      summary: Create a user
+      description: Create a new user
+      parameters:
+        - name: user
+          in: body
+          description: User to create
+          required: True
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: User username
+              password:
+                type: string
+                description: User hashed password
+              salt:
+                type: string
+                description: User hashed salt
+      responses:
+        201:
+          description: Successfully created person
+          schema:
+            properties:
+              user_id:
+                type: string
+                description: User Id
+              username:
+                type: string
+                description: Username
+              password:
+                type: string
+                description: hashed Password
+              salt:
+                type: string
+                description: hashed Salt
+  /users/{username}:
+    get:
+      operationId: users.read_one
+      tags:
+        - Users
+      summary: Read one user
+      description: Read one user
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user to get
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read user from users data operation
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+                description: Id of the user
+              username:
+                type: string
+                description: Username of the user
+              password:
+                type: string
+                description: hashed password of the user
+              salt:
+                type: string
+                description: hashed salt of the user
+  /users/byid/{user_id}:
+    get:
+      operationId: users.read_one_by_id
+      tags:
+        - Users
+      summary: Read one user by id
+      description: Read one user by id
+      parameters:
+        - name: user_id
+          in: path
+          description: Id of the user to get
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read user from users data operation
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+                description: Id of the user
+              username:
+                type: string
+                description: Username of the user
+              password:
+                type: string
+                description: hashed password of the user
+              salt:
+                type: string
+                description: hashed salt of the user

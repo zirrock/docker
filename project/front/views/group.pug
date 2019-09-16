@@ -1,0 +1,28 @@
+link(rel= 'stylesheet' type='text/css' media='screen' href='/stylesheets/style.css')
+include header
+p.group-header #{group.name}
+hr
+.container
+    .group-left
+        if dates && (dates.length > 0)
+            ul.group-view
+                each date in dates
+                    li
+                        .date-card
+                            p #{date.name}
+                            p #{date.date}
+        else
+            p Nie ma żadnych zbliżających się terminów
+    .group-right
+        if group.owner == group.user
+            form.add-date(method="POST" action="/createDate")
+                h2 Dodaj datę
+                label#add-date-name-label Nazwa daty
+                input.add-date-name-input(type="text" name="dateName")
+                label#add-date-date-label Data
+                input.add-date-date-label(type="date" name="dateDate")
+                input(type="hidden" name="dateGroup" value=group.group_id)
+                br
+                input(type="submit" name="create" value="Dodaj")
+        else
+            form

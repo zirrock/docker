@@ -1,0 +1,150 @@
+swagger: "2.0"
+info:
+  description: "None"
+  version: "1.0.0"
+  title: Rest api
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+
+paths:
+  /dates:
+    get:
+      operationId: dates.read_all
+      tags:
+        - Dates
+      summary: Read the entire set of dates, sorted chronologically
+      responses:
+        200:
+          description: Successfully read dates
+          schema:
+            type: array
+            items:
+              properties:
+                date_id:
+                  type: string
+                  description: date_id
+                name:
+                  type: string
+                  description: date name
+                date:
+                  type: string
+                  description: time of the date
+                group_id:
+                  type: string
+                  description: id of the group
+  /dates/create:
+    post:
+      operationId: dates.create_date
+      tags:
+        - Dates
+      summary: Create a new date in the group
+      description: Create a new date in the group
+      parameters:
+        - name: date
+          in: body
+          description: date entry to create
+          required: True
+          schema:
+            type: object
+            properties:
+              date:
+                type: string
+                description: actual date
+              name:
+                type: string
+                description: name of the event
+              group_id:
+                type: string
+                description: name of the group this date was created for
+      responses:
+        202:
+          description: Date created
+          schema:
+            type: object
+            properties:
+              date_id: 
+                type: string
+                description: date id
+              date:
+                type: string
+                description: actual date
+              name:
+                type: string
+                description: name of the event
+              group_id:
+                type: string
+                description: name of the group this date was created for
+              
+  /dates/incoming/{group_id}:
+    get:
+      operationId: dates.read_group_dates
+      tags:
+        - Dates
+      summary: Read dates from one group
+      description: Read dates from one group
+      parameters:
+        - name: group_id
+          in: path
+          description: id of the group
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read dates from group
+          schema:
+            type: array
+            items:
+              properties:
+                date_id:
+                  type: string
+                  description: date_id
+                date:
+                  type: string
+                  description: actual date
+                name:
+                  type: string
+                  description: name give to date
+                group_id:
+                  type: string
+                  description: group this date belongs to
+  /dates/incoming:
+    post:
+      operationId: dates.read_groups_dates
+      tags:
+        - Dates
+      summary: Read all dates needed by someone from groups
+      description: Read all dates needed by someone from groups
+      parameters:
+        - name: groups
+          in: body
+          description: groups to search by
+          schema:
+            type: array
+            items:
+              properties:
+                group_id:
+                  type: string
+                  description: owner
+      responses:
+        200:
+          description: Successfully read dates
+          schema:
+            type: array
+            items:
+              properties:
+                date_id:
+                  type: string
+                  description: date_id
+                date:
+                  type: string
+                  description: actual date
+                name:
+                  type: string
+                  description: name given to date
+                group_id:
+                  type: string
+                  description: group this date belongs to

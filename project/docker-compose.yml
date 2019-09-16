@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  front:
+    build: ./front
+    volumes:
+      - ./front:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 8080:8080
+    command: npm start
+
+  users:
+    build: ./users
+    volumes: 
+      - ./users:/usr/src/app/users
+    command: python3 server.py
+
+  groups:
+    build: ./groups
+    volumes:
+      - ./groups:/usr/src/app/groups
+    command: python3 server.py
+    depends_on:
+      - redis
+
+  dates:
+    build: ./dates
+    volumes:
+      - ./dates:/usr/src/app/dates
+    command: python3 server.py
+    depends_on:
+      - redis
+
+  worker:
+    build: ./worker
+    volumes:
+      - ./worker:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm start
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:4.0.11-alpine
