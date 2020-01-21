@@ -9,7 +9,14 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const crypto = require('crypto');
 const redis = require('redis');
+const elasticsearch = require('elasticsearch');
 var pub = redis.createClient('redis://redis:6379');
+
+var ESclient = new elasticsearch.Client( {
+    host:'http://project_es01_1:9200',
+    log: 'trace',
+    requestTimeout: Infinity
+});
 
 function hashPassword(password, salt) {
     var hash = crypto.createHash('sha256');
@@ -75,6 +82,21 @@ app.set('view engine', 'pug');
 app.set('views', __dirname + '/views');
 app.set('view options', {basedir: process.env.__dirname});
 
+app.get('/sub/:Gname/:Gowner', function(req, res) {
+    if(!req.user) res.redirect('/loginPage');
+    else {
+        var body = {
+            address: 'http://project_groups_1:5002/api/groups/create',
+            body: {
+                name: req.params.Gname, 
+                user: req.user.username, 
+                owner: req.params.Gowner
+            }
+        }
+        pub.publish('worker', JSON.stringify(body));
+        res.redirect('/');
+    }
+});
 app.get('/groups/:group_id', function(req, res) {
     if(!req.user) res.redirect('/loginPage');
     else {
@@ -82,7 +104,7 @@ app.get('/groups/:group_id', function(req, res) {
         .then (function(response) {
             return response.json();
         }).then(function(group) {
-            fetch('http://project_dates_1:5003/api/dates/incoming/' + req.params.group_id) .then(function(response) {
+            fetch('http://project_varnish_1:80/api/dates/incoming/' + req.params.group_id) .then(function(response) {
                 return response.json();
             }).then(function(dates) {
                 res.render('group', {group:group, dates: dates.sort(function(a,b) 
@@ -101,7 +123,7 @@ app.post('/createDate', function(req, res) {
     if (!req.user) res.redirect('/loginPage');
     else {
         var body = {
-            address: 'http://project_dates_1:5003/api/dates/create',
+            address: 'http://project_varnish_1:80/api/dates/create',
             body: {
                 date: req.body.dateDate,
                 name: req.body.dateName,
@@ -123,26 +145,91 @@ app.post('/createGroup', function(req, res) {
                 name: req.body.groupCreate, 
                 user: req.user.username, 
                 owner: req.user.username
-        }
-    };
-    pub.publish('worker', JSON.stringify(body));
-	res.redirect('/');
-    }
-});
-
-app.post('/subscribeGroup', function(req, res) {
-    if (!req.user) res.redirect('/loginPage');
-    else {
-        var body = {
-            address: 'http://project_groups_1:5002/api/groups/create',
-            body: {
-                name: req.body.groupSubscribe,
-                user: req.user.username,
-                owner: req.body.owner
             }
         };
-        pub.publish('worker', JSON.stringify(body));
-        res.redirect('/');
+        ESclient.indices.exists({index: 'groups'}).then(function(resp){
+            if (resp) {
+                console.log('index already exists');
+                ESclient.index({
+                    index: 'groups',
+                    body: {
+                        name: req.body.groupCreate,
+                        owner: req.user.username
+                    }
+                }).then(function(resp) {
+                    pub.publish('worker', JSON.stringify(body));
+                    res.redirect('/');
+                }).catch(function(err) {
+                    console.log(err);
+                    res.redirect('/');
+                });
+            } else {
+                console.log('creating');
+                ESclient.indices.create({index : 'groups'}).then(function(resp) {
+                    ESclient.index({
+                        index: 'groups',
+                        body: {
+                            name: req.body.groupCreate,
+                            owner: req.user.username
+                        }
+                    }).then(function(resp) {
+                        pub.publish('worker', JSON.stringify(body));
+                        res.redirect('/');
+                    }).catch(function(err) {
+                        console.log(err);
+                        res.redirect('/');
+                    });
+                }).catch(function(err) {
+                    console.log(err);
+                    res.redirect('/');
+                });
+            }
+        }).catch(function(err) {
+            console.log('error!');
+            console.log(err);
+            res.redirect('/');
+        });
+    };
+});
+
+
+app.post('/subscribeGroup', function(req, res) {
+    console.log("here");
+    if (!req.user) res.redirect('/loginPage');
+    else {
+        ESclient.search({
+            index: 'groups',
+            body: {
+                query: {
+                    bool : {
+                        must: [
+                            {
+                                fuzzy : {
+                                    "name" : req.body.groupSubscribe
+                                }
+                            },
+                            {
+                                fuzzy : {
+                                    "owner" : req.body.owner
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }).then(function(response){
+            var result = [];
+            for(var i = 0; i < response.hits.hits.length; i++) {
+                result[i] = response.hits.hits[i]._source;
+            }
+            console.log("-------------");
+            console.log(result);
+            console.log("-------------");
+            return res.render('group_list', {groups: result});
+        }).catch(function(error) {
+            console.error(error);
+            return res.redirect('/')
+        });
     }
 });
 
@@ -163,7 +250,7 @@ app.get('/', function(req, res) {
                 console.log(body);
                 body = body.map(x => x.group_id);
                 console.log(body);
-                return fetch('http://project_dates_1:5003/api/dates/incoming', 
+                return fetch('http://project_varnish_1:80/api/dates/incoming', 
                 {
                     method: 'POST', 
                     body: JSON.stringify(body), 

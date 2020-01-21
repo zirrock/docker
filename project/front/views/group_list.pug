@@ -1,0 +1,18 @@
+link(rel= 'stylesheet' type='text/css' media='screen' href='/stylesheets/style.css')
+include header
+p.group-header Wyniki wyszukiwania
+hr
+.container
+    .group-left
+    nav.center
+        if groups && (groups.length > 0)
+            ul.group-view
+                each group in groups
+                    li
+                        .date-card
+                            p #{group.name}
+                            p #{group.owner}
+                            a(href='/sub/' + group.name + '/' + group.owner) Subskrybuj
+        else
+            p Nie znaleziono żadnych grup odpowiadających podanych informacjom.
+    .group-right
