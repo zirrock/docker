@@ -1,3 +1,5 @@
+Prosty serwis społecznościowy implementowany na potrzeby przedmiotów "Języki i narządzia programowania 2" i "Języki i narzędzia programowania 3". Projekt zbudowany z użyciem Node.js na frontendzie i oparty na Pythonie backend używający Flask i SQLAlchemy. Zbudowany używając architektury mikroserwisów na podstawie kontenerów Docker.
+
 Uruchomienie serwisu:
 docker-compose up --scale dates=2
 
